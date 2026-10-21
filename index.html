@@ -21,6 +21,7 @@
   --bg:#141917; --land:#1b211e; --panel:#1f2623; --ink:#e7ece8; --muted:#9aa7a1; --line:#33403a;
   --route:#ff4d5e; --pin:#f3f5f2; --hl:#5a4a12; --elev:#ff4d5e26; --me:#5ea1ff; color-scheme:dark}}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
 .wrap{max-width:1240px;margin:0 auto;padding:20px max(16px,env(safe-area-inset-right)) 32px max(16px,env(safe-area-inset-left))}
 header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;margin-bottom:16px}
@@ -80,6 +81,7 @@ input[type=range]{width:100%;padding:0;border:0;background:transparent;accent-co
 .outs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0;padding-top:12px;border-top:1px dashed var(--line)}
 .outs div{min-width:0;text-align:center}
 .outs dt{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.splitnote{margin-top:-8px}
 .outs dd{margin:2px 0 0;font:500 16px var(--mono);font-variant-numeric:tabular-nums}
 .bib{border:2px solid var(--ink);border-radius:10px;padding:14px 16px;background:var(--panel);position:relative}
 .bib::before,.bib::after{content:"";position:absolute;top:10px;width:8px;height:8px;border-radius:50%;border:2px solid var(--ink);background:var(--bg)}
@@ -182,6 +184,7 @@ input[type=range]{width:100%;padding:0;border:0;background:transparent;accent-co
           <div><dt>First half</dt><dd id="o-h1">–</dd></div>
           <div><dt>Second half</dt><dd id="o-h2">–</dd></div>
         </dl>
+        <p class="help splitnote" id="o-note"></p>
       </section>
 
       <section class="bib" id="readout" aria-live="polite"></section>
@@ -389,6 +392,11 @@ function render(){
   const st=state();
   const h1=st.T?elapsed(13.1,st):0;
   $("o-pace").textContent=st.T?`${fmtPace(st.T)}/${unit}`:"–";$("o-h1").textContent=st.T?fmtDur(h1):"–";$("o-h2").textContent=st.T?fmtDur(st.T-h1):"–";
+  const diff=st.T?Math.round((st.T-h1)-h1):0,dtxt=`${fmtDur(Math.abs(diff))} ${diff>0?"slower":"faster"}`;
+  $("o-note").textContent=!st.T?"":st.model==="even"?"Same pace every mile, so the halves match.":
+    st.model==="course"?(Math.abs(diff)<5?"Richmond's climbs and descents roughly cancel out, so the halves come out about even.":
+      `Second half ${dtxt}: the pace follows the hills, and the back half of Richmond's course has a little more downhill than the front.`):
+    `Second half ${dtxt}.`;
   const ul=$("spots");ul.innerHTML="";
   SPOTS.forEach(([n,m],i)=>{const li=document.createElement("li");const b=document.createElement("button");
     b.setAttribute("aria-pressed",sel&&sel.spot===i?"true":"false");
