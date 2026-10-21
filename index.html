@@ -70,6 +70,9 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
 .btn .dot{width:10px;height:10px;border-radius:50%;background:var(--me);box-shadow:0 0 0 3px #1a73e833}
 #map{width:100%;height:min(72vh,680px);min-height:380px;background:var(--land)}
 .leaflet-container{font-family:var(--body)}
+/* soften the busy OSM style so the red course line stands out; darken it in dark mode */
+.basemap{filter:saturate(.45) contrast(.92) brightness(1.04)}
+@media (prefers-color-scheme: dark){.basemap{filter:invert(1) hue-rotate(180deg) saturate(.35) brightness(.85) contrast(.9)}}
 .mile-lab{font:500 11px var(--mono);color:var(--route);background:var(--panel);border:1.5px solid var(--route);border-radius:9px;padding:0 5px;line-height:16px;white-space:nowrap;text-align:center}
 .flag-lab{font:700 12px var(--display);text-transform:uppercase;letter-spacing:.08em;color:var(--panel);background:var(--ink);border-radius:4px;padding:1px 6px;white-space:nowrap}
 .leaflet-tooltip.etatip{font:500 12px var(--mono);background:var(--ink);color:var(--panel);border:0;box-shadow:none}
@@ -195,8 +198,8 @@ $("pace").addEventListener("blur",()=>{if(T)$("pace").value=fmtDur(T/26.2);});
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const dark=matchMedia("(prefers-color-scheme: dark)").matches;
 const map=L.map("map",{zoomControl:true,tap:true});
-L.tileLayer(`https://{s}.basemaps.cartocdn.com/${dark?"dark_all":"light_all"}/{z}/{x}/{y}{r}.png`,{
-  subdomains:"abcd",maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'}).addTo(map);
+L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{
+  maxZoom:19,className:"basemap",attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
 const latlngs=C.map(c=>[c[0],c[1]]);
 L.polyline(latlngs,{color:css("--route"),weight:12,opacity:.18,interactive:false}).addTo(map);
 const route=L.polyline(latlngs,{color:css("--route"),weight:4.5,opacity:.95}).addTo(map);
