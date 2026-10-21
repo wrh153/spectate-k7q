@@ -41,8 +41,34 @@ h1 span{color:var(--route)}
 input,select{font:500 16px var(--mono);color:var(--ink);background:var(--land);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%}
 input[aria-invalid="true"]{border-color:var(--route)}
 input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--route);outline-offset:2px}
-.pace{display:flex;justify-content:space-between;gap:8px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);font-size:13px;color:var(--muted)}
-.pace b{font-family:var(--mono);font-weight:500;color:var(--ink)}
+.runner{display:flex;flex-direction:column;gap:16px}
+.runhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.runhead .label{margin:0}
+.sublabel{font-size:12.5px;color:var(--muted);display:block;margin-bottom:4px;padding:0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{font:500 12px var(--mono);border:0;background:var(--land);color:var(--muted);padding:5px 9px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.goal{display:flex;flex-direction:column;gap:6px}
+.bigtime{font:700 44px/1 var(--display);letter-spacing:.01em;text-align:center;padding:6px 10px;font-variant-numeric:tabular-nums;background:transparent;border-color:transparent}
+.bigtime:hover{border-color:var(--line)}
+.bigtime:focus{background:var(--land);border-color:var(--line)}
+input[type=range]{width:100%;padding:0;border:0;background:transparent;accent-color:var(--route);height:28px}
+.ticks{display:flex;justify-content:space-between;font:400 11px var(--mono);color:var(--muted);margin-top:-6px}
+.help{font-size:12px;color:var(--muted);margin:0;text-align:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:4px}
+.chip{font:500 12.5px var(--mono);border:1px solid var(--line);background:var(--land);color:var(--ink);border-radius:999px;padding:4px 10px;cursor:pointer;display:inline-flex;gap:6px;align-items:baseline}
+.chip small{color:var(--muted);font-size:11px}
+.chip[aria-pressed="true"]{border-color:var(--route);box-shadow:inset 0 0 0 1px var(--route)}
+.models{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+.model{display:grid;grid-template-columns:18px minmax(0,1fr);gap:8px;align-items:start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;cursor:pointer;font-size:13px;color:var(--muted)}
+.model input{width:auto;margin:3px 0 0;accent-color:var(--route)}
+.model b{display:block;color:var(--ink);font-size:14px;font-weight:600}
+.model:has(input:checked){border-color:var(--route);background:var(--land)}
+.splitamt{margin-top:4px}
+.outs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0;padding-top:12px;border-top:1px dashed var(--line)}
+.outs div{min-width:0;text-align:center}
+.outs dt{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.outs dd{margin:2px 0 0;font:500 16px var(--mono);font-variant-numeric:tabular-nums}
 .bib{border:2px solid var(--ink);border-radius:10px;padding:14px 16px;background:var(--panel);position:relative}
 .bib::before,.bib::after{content:"";position:absolute;top:10px;width:8px;height:8px;border-radius:50%;border:2px solid var(--ink);background:var(--bg)}
 .bib::before{left:10px}.bib::after{right:10px}
@@ -96,26 +122,50 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
 
   <div class="grid">
     <div class="rail">
-      <section class="card" aria-labelledby="runner-h">
-        <h2 class="label" id="runner-h">Your runner</h2>
-        <div class="fields">
-          <div class="linked">
-            <div class="field"><label for="finish">Goal finish (h:mm:ss)</label><input id="finish" value="3:45:00" inputmode="numeric" autocomplete="off"></div>
-            <span class="eq" aria-hidden="true">=</span>
-            <div class="field"><label for="pace">Avg pace (min/mi)</label><input id="pace" value="8:35" inputmode="numeric" autocomplete="off"></div>
-          </div>
-          <div class="field"><label for="gun">Race start</label><input id="gun" type="time" value="07:00"></div>
-          <div class="field"><label for="delay">Minutes to reach start line</label><input id="delay" type="number" min="0" max="60" step="1" value="6"></div>
-          <div class="field full"><label for="strategy">Pacing</label>
-            <select id="strategy">
-              <option value="0">Even pace the whole way</option>
-              <option value="0.05" selected>Slows a little late (typical)</option>
-              <option value="0.10">Slows a lot late</option>
-              <option value="-0.03">Negative split (faster second half)</option>
-            </select>
+      <section class="card runner" aria-labelledby="runner-h">
+        <div class="runhead">
+          <h2 class="label" id="runner-h">Your runner</h2>
+          <div class="seg units" role="group" aria-label="Pace units">
+            <button type="button" data-unit="mi" aria-pressed="true">min/mi</button><button type="button" data-unit="km" aria-pressed="false">min/km</button>
           </div>
         </div>
-        <div class="pace"><span>Per km <b id="kmpace">–</b></span><span>Half split <b id="halfsplit">–</b></span></div>
+
+        <div class="goal">
+          <label for="finish" class="sublabel">Goal finish time</label>
+          <input id="finish" class="bigtime" value="3:45:00" inputmode="numeric" autocomplete="off" aria-describedby="finish-help">
+          <input id="slider" type="range" min="9000" max="28800" step="60" value="13500" aria-label="Goal finish time slider">
+          <div class="ticks" aria-hidden="true"><span>2:30</span><span>8:00</span></div>
+          <p class="help" id="finish-help">Drag the slider, or tap the time to type it.</p>
+          <div class="chips" id="chips" aria-label="Quick targets"></div>
+        </div>
+
+        <div class="field paceline">
+          <label for="pace" id="pace-l">Average pace (min/mi)</label>
+          <input id="pace" value="8:35" inputmode="numeric" autocomplete="off">
+        </div>
+
+        <fieldset class="models">
+          <legend class="sublabel">Pacing model</legend>
+          <label class="model"><input type="radio" name="model" value="even"><span><b>Even</b>Same pace every mile.</span></label>
+          <label class="model"><input type="radio" name="model" value="course" checked><span><b>Course-aware</b>Slower on Richmond's climbs, like the Lee Bridge exit and Semmes Ave, faster where the course drops.</span></label>
+          <label class="model"><input type="radio" name="model" value="fade"><span><b>Fades late</b>Second half slower than the first, the way most marathons go.</span></label>
+          <label class="model"><input type="radio" name="model" value="neg"><span><b>Negative split</b>First half held back on purpose, second half faster.</span></label>
+          <div class="field splitamt" id="splitwrap" hidden>
+            <label for="splitamt" id="splitamt-l">Second half slower by (m:ss)</label>
+            <input id="splitamt" value="5:00" inputmode="numeric" autocomplete="off">
+          </div>
+        </fieldset>
+
+        <div class="fields">
+          <div class="field"><label for="gun">Race start</label><input id="gun" type="time" value="07:00"></div>
+          <div class="field"><label for="delay">Minutes to reach start line</label><input id="delay" type="number" min="0" max="60" step="1" value="6"></div>
+        </div>
+
+        <dl class="outs">
+          <div><dt>Avg pace</dt><dd id="o-pace">–</dd></div>
+          <div><dt>First half</dt><dd id="o-h1">–</dd></div>
+          <div><dt>Second half</dt><dd id="o-h2">–</dd></div>
+        </dl>
       </section>
 
       <section class="bib" id="readout" aria-live="polite"></section>
@@ -142,6 +192,10 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+// Backup CDN if unpkg is unreachable
+window.L||document.write('<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""><\/script>');
+</script>
 <script>
 (()=>{
 // ---------- Course: [lat, lon, elevation m] from GPX ----------
@@ -181,20 +235,67 @@ function parseHMS(s){const p=s.trim().split(":");if(p.some(x=>x===""||isNaN(+x))
 function parseMS(s){const p=s.trim().split(":");if(p.some(x=>x===""||isNaN(+x)))return null;const n=p.map(Number);return n.length===2?n[0]*60+n[1]:n.length===1?n[0]*60:null;}
 const fmtDur=s=>{s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return (h?h+":"+String(m).padStart(2,"0"):m)+":"+String(x).padStart(2,"0");};
 const fmtClock=sec=>{sec=Math.round(sec/60)*60;let h=Math.floor(sec/3600)%24,m=Math.floor(sec%3600/60);const ap=h>=12?"PM":"AM";h=h%12||12;return h+":"+String(m).padStart(2,"0")+" "+ap;};
-const MIN_T=2*3600,MAX_T=8*3600;
-let T=parseHMS($("finish").value);
-function state(){const g=($("gun").value||"07:00").split(":").map(Number);return {T,gun:g[0]*3600+g[1]*60,delay:Math.max(0,+$("delay").value||0)*60,s:+$("strategy").value};}
-const frac=(x,s)=>x*(1-s+s*x);
-function etaAt(m,st){const el=st.T*frac(m/26.2,st.s);const clock=st.gun+st.delay+el;const w=60+0.02*el;return {el,clock,lo:clock-w,hi:clock+w};}
+const MIN_T=2*3600,MAX_T=8*3600,KM=42.195;
+let T=parseHMS($("finish").value),unit="mi",model="course";
+const DIST=()=>unit==="mi"?26.2:KM;
+const fmtPace=t=>fmtDur(t/DIST());
+
+// Course-aware model: each stretch costs more time uphill and gives some back downhill.
+// About +3.3% time per 1% of climb, -1.8% per 1% of descent, on elevation smoothed over ~0.3 mi.
+const CW=(()=>{const n=C.length,sm=new Array(n);
+  for(let i=0;i<n;i++){let s=0,c=0;for(let j=i;j>=0&&mi[i]-mi[j]<=0.15;j--){s+=C[j][2];c++;}for(let j=i+1;j<n&&mi[j]-mi[i]<=0.15;j++){s+=C[j][2];c++;}sm[i]=s/c;}
+  const w=[0];for(let i=1;i<n;i++){const dm=mi[i]-mi[i-1],run=dm*1609.34;const g=run>0?Math.max(-.08,Math.min(.08,(sm[i]-sm[i-1])/run)):0;w.push(w[i-1]+dm*(g>=0?1+3.3*g:1+1.8*g));}
+  return w.map(x=>x/w[n-1]);})();
+const frac=(x,s)=>x*(1-s+s*x); // linear pace change; second half minus first half = s*T/2
+function state(){const g=($("gun").value||"07:00").split(":").map(Number);
+  let D=parseMS($("splitamt").value)||0;if(model==="neg")D=-D;
+  const s=T?Math.max(-.6,Math.min(.6,2*D/T)):0;
+  return {T,gun:g[0]*3600+g[1]*60,delay:Math.max(0,+$("delay").value||0)*60,model,s};}
+function elapsed(m,st){const x=Math.max(0,Math.min(1,m/26.2));
+  if(st.model==="even")return st.T*x;
+  if(st.model==="course"){const i=idxAt(m),j=Math.min(i+1,mi.length-1);const t=(m-mi[i])/((mi[j]-mi[i])||1);return st.T*(CW[i]+t*(CW[j]-CW[i]));}
+  return st.T*frac(x,st.s);}
+function etaAt(m,st){const el=elapsed(m,st);const clock=st.gun+st.delay+el;const w=60+0.02*el;return {el,clock,lo:clock-w,hi:clock+w};}
+
+// Goal time, slider, pace and quick targets all stay in sync
+const TARGETS=[3*3600,3.5*3600,4*3600,4.5*3600,5*3600];
+function sync(from){
+  ["finish","pace"].forEach(id=>$(id).setAttribute("aria-invalid","false"));
+  if(!T)return;
+  if(from!=="finish")$("finish").value=fmtDur(T);
+  if(from!=="pace")$("pace").value=fmtPace(T);
+  if(from!=="slider")$("slider").value=Math.max(9000,Math.min(28800,T));
+  $("chips").innerHTML=TARGETS.map(t=>`<button type="button" class="chip" data-t="${t}" aria-pressed="${Math.abs(t-T)<1}">${fmtDur(t).slice(0,-3)}<small>${fmtPace(t)}/${unit}</small></button>`).join("");
+}
+$("chips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;T=+b.dataset.t;sync();render();});
+$("slider").addEventListener("input",()=>{T=+$("slider").value;sync("slider");render();});
 $("finish").addEventListener("input",()=>{const v=parseHMS($("finish").value);const ok=v&&v>=MIN_T&&v<=MAX_T;
-  $("finish").setAttribute("aria-invalid",ok?"false":"true");$("pace").setAttribute("aria-invalid","false");if(ok){T=v;$("pace").value=fmtDur(T/26.2);}else T=null;render();});
-$("pace").addEventListener("input",()=>{const v=parseMS($("pace").value);const tot=v?v*26.2:0;const ok=tot>=MIN_T&&tot<=MAX_T;
-  $("pace").setAttribute("aria-invalid",ok?"false":"true");$("finish").setAttribute("aria-invalid","false");if(ok){T=tot;$("finish").value=fmtDur(T);}else T=null;render();});
+  if(ok){T=v;sync("finish");}else{T=null;$("finish").setAttribute("aria-invalid","true");}render();});
+$("pace").addEventListener("input",()=>{const v=parseMS($("pace").value);const tot=v?v*DIST():0;const ok=tot>=MIN_T&&tot<=MAX_T;
+  if(ok){T=tot;sync("pace");}else{T=null;$("pace").setAttribute("aria-invalid","true");}render();});
 $("finish").addEventListener("blur",()=>{if(T)$("finish").value=fmtDur(T);});
-$("pace").addEventListener("blur",()=>{if(T)$("pace").value=fmtDur(T/26.2);});
-["gun","delay","strategy"].forEach(id=>$(id).addEventListener("input",render));
+$("pace").addEventListener("blur",()=>{if(T)$("pace").value=fmtPace(T);});
+document.querySelectorAll(".units button").forEach(b=>b.addEventListener("click",()=>{unit=b.dataset.unit;
+  document.querySelectorAll(".units button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+  $("pace-l").textContent=`Average pace (min/${unit})`;sync();render();}));
+document.querySelectorAll('input[name="model"]').forEach(r=>r.addEventListener("change",()=>{model=r.value;
+  const split=model==="fade"||model==="neg";$("splitwrap").hidden=!split;
+  if(split){$("splitamt-l").textContent=`Second half ${model==="fade"?"slower":"faster"} by (m:ss)`;$("splitamt").value=model==="fade"?"5:00":"1:30";}
+  render();}));
+$("splitamt").addEventListener("input",()=>{const v=parseMS($("splitamt").value);$("splitamt").setAttribute("aria-invalid",v==null||v>1800?"true":"false");render();});
+["gun","delay"].forEach(id=>$(id).addEventListener("input",render));
+sync();
 
 // ---------- Leaflet map ----------
+// If the map library couldn't load (for example in a sandboxed preview), keep everything
+// else working: swap in a do-nothing stand-in for Leaflet and explain in the map area.
+const mapOK=!!window.L;
+if(!mapOK){
+  const stub=new Proxy(function(){},{get:(t,k)=>k===Symbol.toPrimitive?()=>0:stub,apply:()=>stub,construct:()=>stub});
+  window.L=stub;
+  const m=$("map");m.style.cssText+=";display:grid;place-items:center;text-align:center;padding:24px;color:var(--muted);font-size:14px";
+  m.textContent="The street map couldn't load here. It needs an internet connection to unpkg.com and openstreetmap.org, which some previews block. Open the page from your GitHub Pages link to see it.";
+}
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const dark=matchMedia("(prefers-color-scheme: dark)").matches;
 const map=L.map("map",{zoomControl:true,tap:true});
@@ -254,14 +355,15 @@ function showErr(msg){$("readout").innerHTML=`<p class="empty err">${msg}</p>`;}
 let sel=null;
 function render(){
   const st=state();
-  $("kmpace").textContent=st.T?fmtDur(st.T/42.195):"–";$("halfsplit").textContent=st.T?fmtDur(st.T*frac(.5,st.s)):"–";
+  const h1=st.T?elapsed(13.1,st):0;
+  $("o-pace").textContent=st.T?`${fmtPace(st.T)}/${unit}`:"–";$("o-h1").textContent=st.T?fmtDur(h1):"–";$("o-h2").textContent=st.T?fmtDur(st.T-h1):"–";
   const ul=$("spots");ul.innerHTML="";
   SPOTS.forEach(([n,m],i)=>{const li=document.createElement("li");const b=document.createElement("button");
     b.setAttribute("aria-pressed",sel&&sel.spot===i?"true":"false");
     b.innerHTML=`<span class="mi">${m.toFixed(1)}</span><span class="nm">${n}</span><span class="tm">${st.T?fmtClock(etaAt(m,st).clock):"–"}</span>`;
     b.onclick=()=>{sel={passes:[pointAt(m)],label:n,spot:i,exact:true,pan:true};render();};li.appendChild(b);ul.appendChild(li);});
   const ro=$("readout");eMarks.innerHTML="";pinLayer.clearLayers();
-  if(!st.T){ro.innerHTML=`<p class="empty">Enter a finish time between 2:00:00 and 8:00:00 (like 3:45:00), or a pace between 4:35 and 18:19 per mile.</p>`;$("elevnow").textContent="";return;}
+  if(!st.T){ro.innerHTML=`<p class="empty">Enter a finish time between 2:00:00 and 8:00:00 (like 3:45:00), or an average pace that lands in that range.</p>`;$("elevnow").textContent="";return;}
   if(!sel){ro.innerHTML=`<p class="empty">Tap anywhere on the course map, pick a cheering spot below, or use Near me on race day.</p>`;return;}
   const ps=sel.passes,p=ps[0],e=etaAt(p.m,st);
   const gm=`https://www.google.com/maps/search/?api=1&query=${p.ll[0].toFixed(5)},${p.ll[1].toFixed(5)}`;
